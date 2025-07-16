@@ -3,12 +3,11 @@ const Blog = require("../models/blog.model");
 exports.createBlog = async (req, res) => {
   try {
     const { title, description, author, banner } = req.body;
-
     const newBlog = new Blog({
       title,
       description,
       author,
-      banner,
+      banner: `http://localhost:4000/static/${req.file.filename}`,
     });
 
     const savedBlog = await newBlog.save();

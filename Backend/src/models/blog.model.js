@@ -14,7 +14,6 @@ const blogSchema = new Schema(
     },
     banner: {
       type: String, // URL of the image
-      required: true,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId, // refers to a User
