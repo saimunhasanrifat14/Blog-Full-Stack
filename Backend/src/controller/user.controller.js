@@ -46,3 +46,21 @@ exports.registration = async (req, res) => {
     });
   }
 };
+exports.login = async (req, res) => {
+  try {
+    const isExist = await userModel.findOne({
+      $and: [{ email: req.body.email, password: req.body.password }],
+    });
+
+    if (!isExist) {
+      return res.status(401).json({
+        msg: "email/passoword invalid",
+      });
+    }
+    return res.status(200).json({
+      msg: "login Succesfull",
+    });
+  } catch (error) {
+    console.log("error from login", error);
+  }
+};

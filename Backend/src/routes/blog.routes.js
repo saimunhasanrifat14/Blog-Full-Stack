@@ -6,5 +6,5 @@ const path = require("path");
 
 router.post("/create-blog", upload.single("banner"), blogController.createBlog);
 router.get("/all-blog", blogController.getAllBlog);
-router.use("/static", express.static("public/temp"));
+router.use("/banner", express.static("public/temp"));
 module.exports = router;

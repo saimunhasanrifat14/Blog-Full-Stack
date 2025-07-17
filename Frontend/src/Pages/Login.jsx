@@ -8,6 +8,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [error, seterror] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,12 +21,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // You can add Firebase or API logic here
+    const { email, password } = loginData;
+    const userData = {
+      email,
+      password,
+    };
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/login",
+        userData
+      );
+      console.log("response", response);
+      navigate("/blogs");
+    } catch (error) {
+      if (error.response.data.msg) {
+        seterror(error.response.data.msg);
+      }
+      console.log("error from signup page", error);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+        <p className="text-red-400 text-sm text-center w-full pb-4">
+          {error ? error : ""}
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

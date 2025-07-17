@@ -5,10 +5,22 @@ const Blogs = () => {
   const [blog, setBlogs] = useState([]);
   const [realtime, setrealtime] = useState(false);
   const [formData, setFormData] = useState({
-    blogTitle: "",
-    blogDescrioption: "",
-    image: null,
+    title: "",
+    description: "",
+    banner: null,
   });
+
+  useEffect(() => {
+    const getAllBlog = async () => {
+      try {
+        const allblog = await axios.get("http://localhost:4000/all-blog");
+        setBlogs(allblog?.data?.data);
+      } catch (error) {
+        console.log("error from get all blog", error);
+      }
+    };
+    getAllBlog();
+  }, [realtime]);
 
   const blogs = [
     {
@@ -40,14 +52,14 @@ const Blogs = () => {
       image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7",
     },
     {
-      id: 3,
+      id: 5,
       blogTitle: "10 CSS Tricks Every Developer Should Know",
       blogDescrioption:
         "Improve your UI design skills with these helpful CSS techniques.",
       image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7",
     },
     {
-      id: 4,
+      id: 6,
       blogTitle: "Why Tailwind CSS is a Game Changer",
       blogDescrioption:
         "Discover how Tailwind speeds up your styling process and makes your UI consistent.",
@@ -65,6 +77,24 @@ const Blogs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("banner", formData.banner);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/create-blog",
+        formDataToSend
+      );
+      if (response.status == 201) {
+        setrealtime(!realtime);
+      }
+      setFormData({ title: "", description: "", banner: null });
+    } catch (error) {
+      console.log("error from Blogs page", error);
+    }
   };
 
   return (
@@ -76,17 +106,17 @@ const Blogs = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
-              name="blogTitle"
+              name="title"
               placeholder="Blog Title"
-              value={formData.blogTitle}
+              value={formData.title}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-400"
               required
             />
             <textarea
-              name="blogDescrioption"
+              name="description"
               placeholder="Blog Description"
-              value={formData.blogDescrioption}
+              value={formData.description}
               onChange={handleChange}
               rows="4"
               className="w-full border px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-400"
@@ -94,7 +124,7 @@ const Blogs = () => {
             />
             <input
               type="file"
-              name="image"
+              name="banner"
               accept="image/*"
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-400 cursor-pointer"
@@ -111,7 +141,7 @@ const Blogs = () => {
 
       {/* Blog Section - 70% */}
       <div className="w-full sm:w-[70%] h-full grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {blogs?.map((blog) => (
+        {blog?.map((blog) => (
           <div
             key={blog.id}
             className="bg-white rounded-xl shadow-md overflow-hidden relative"
@@ -124,15 +154,15 @@ const Blogs = () => {
             {/* Banner */}
 
             <img
-              src={blog.image}
+              src={blog.banner}
               alt="Banner"
               className="w-full h-80 object-cover"
             />
 
             {/* Title & Description */}
             <div className="p-4">
-              <h3 className="text-lg font-semibold">{blog.blogTitle}</h3>
-              <p className="text-gray-600 mt-2">{blog.blogDescrioption}</p>
+              <h3 className="text-lg font-semibold">{blog.title}</h3>
+              <p className="text-gray-600 mt-2">{blog.description}</p>
             </div>
           </div>
         ))}
