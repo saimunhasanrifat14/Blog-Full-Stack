@@ -171,7 +171,9 @@ const Blogs = () => {
             {/* Title & Description */}
             <div className="p-4">
               <h3 className="text-lg font-semibold">{blog.title}</h3>
-              <p className="text-gray-600 mt-2">{blog.description}</p>
+              <p className="text-gray-600 mt-2 line-clamp-2">
+                {blog.description}
+              </p>
             </div>
           </div>
         ))}

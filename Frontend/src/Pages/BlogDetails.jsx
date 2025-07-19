@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const BlogDetails = () => {
   const [blog, setBlog] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -39,10 +40,23 @@ const BlogDetails = () => {
       const data = new FormData();
       data.append("title", formData.title);
       data.append("description", formData.description);
-      data.append("banner", formData.banner);
-      
+      if (formData.banner && typeof formData.banner !== "string") {
+        data.append("banner", formData.banner);
+      }
+
       await axios.put(`http://localhost:4000/update-blog/${id}`, data);
-      setBlog(formData);
+
+      const updated = await axios.get(
+        `http://localhost:4000/selected-blog/${id}`
+      );
+      const updatedData = updated.data.data;
+
+      setBlog(updatedData);
+      setFormData({
+        title: updatedData.title,
+        description: updatedData.description,
+        banner: updatedData.banner,
+      });
       setIsEditing(false);
     } catch (error) {
       console.log("Error updating blog", error);
@@ -68,13 +82,32 @@ const BlogDetails = () => {
     }
   };
 
+  const handleCancel = () => {
+    setFormData({
+      title: blog.title,
+      description: blog.description,
+      banner: blog.banner,
+    });
+    setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:4000/delete-blog/${id}`);
+      alert("Blog deleted successfully!");
+      navigate("/blogs");
+    } catch (error) {
+      console.log("Error deleting blog", error);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen flex justify-center py-10">
       <div className="max-w-2xl mx-auto bg-white p-6">
         {!isEditing ? (
           // View Mode
           <>
-            <h1 className="text-3xl font-bold mb-4 text-center">
+            <h1 className="text-3xl font-bold p-2 pb-4 text-center">
               {blog.title}
             </h1>
             <img
@@ -87,26 +120,35 @@ const BlogDetails = () => {
             </p>
             <div className="flex justify-center gap-4 mt-4">
               <button
-                className="bg-blue-500 text-white px-6 py-2 rounded-xl hover:bg-blue-600 transition duration-300"
+                className="bg-blue-500 text-white px-6 py-2 rounded-xl hover:bg-blue-600 transition duration-300 cursor-pointer"
                 onClick={() => setIsEditing(true)}
               >
                 Edit Blog
               </button>
-              <button className="bg-red-500 text-white px-6 py-2 rounded-xl hover:bg-red-600 transition duration-300">
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-6 py-2 rounded-xl hover:bg-red-600 transition duration-300 cursor-pointer"
+              >
                 Delete Blog
+              </button>
+              <button
+              onClick={()=> navigate("/blogs")}
+                className="bg-yellow-500 text-white px-6 py-2 rounded-xl hover:bg-yellow-600 transition duration-300 cursor-pointer"
+              >
+                Go back
               </button>
             </div>
           </>
         ) : (
           // Edit Mode
-          <>
+          <div className="">
             {/* for title */}
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full text-3xl font-bold mb-4 text-center border-b-2 pb-2 outline-none"
+              className="w-full text-3xl font-bold text-center border-1 p-2 mb-4 rounded-xl outline-none"
             />
             {/* for banner */}
             <div className="relative w-full mb-6 group">
@@ -118,11 +160,11 @@ const BlogDetails = () => {
                       : URL.createObjectURL(formData.banner)
                   }
                   alt="Preview"
-                  className="w-full h-64 object-cover rounded-xl"
+                  className="w-full object-cover rounded-xl"
                 />
               )}
               {/* Overlay */}
-              <div className="absolute inset-0 bg-[#0000006c] rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+              <div className="absolute inset-0 bg-[#0000006c] rounded-xl flex items-center justify-center transition duration-300">
                 <button
                   type="button"
                   onClick={() =>
@@ -161,13 +203,13 @@ const BlogDetails = () => {
                 Save
               </button>
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancel}
                 className="bg-gray-400 text-white px-6 py-2 rounded-xl hover:bg-gray-500 transition duration-300"
               >
                 Cancel
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

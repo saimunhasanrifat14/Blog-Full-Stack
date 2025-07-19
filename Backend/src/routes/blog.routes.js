@@ -8,5 +8,7 @@ router.post("/create-blog", upload.single("banner"), blogController.createBlog);
 router.get("/all-blog", blogController.getAllBlog);
 router.get("/selected-blog/:id", blogController.getSelectedBlog);
 router.put("/update-blog/:id", upload.single("banner"), blogController.updateBlog);
+router.delete("/delete-blog/:id", blogController.deleteBlog);
+
 router.use("/banner", express.static("public/temp"));
 module.exports = router;

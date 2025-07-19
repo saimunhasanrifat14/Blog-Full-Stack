@@ -63,43 +63,68 @@ exports.getSelectedBlog = async (req, res) => {
 exports.updateBlog = async (req, res) => {
   const { id } = req.params;
   try {
-    const blog = await Blog.findById(id);
-    console.log(blog);
-    // title
+    const selectedBlog = await Blog.findById(id);
+
     if (req.body.title) {
-      blog.title = req.body.title;
-    } else {
-      blog.title;
+      selectedBlog.title = req.body.title;
     }
-    // description
+
     if (req.body.description) {
-      blog.description = req.body.description;
-    } else {
-      blog.description;
+      selectedBlog.description = req.body.description;
     }
-    // banner
+
     if (req.file) {
-      // old image delete
-      const part = blog.banner.split("/");
+      const part = selectedBlog.banner.split("/");
       const bannerLocation = part[part.length - 1];
       const targetPath = path.join("public", "temp", bannerLocation);
-      fs.unlinkSync(targetPath);
-      //   new image
-      blog.banner = `http://localhost:4000/blog/${req?.file?.filename}`;
-    } else {
-      blog.banner = blog.banner;
+      if (fs.existsSync(targetPath)) {
+        fs.unlinkSync(targetPath);
+      }
+      selectedBlog.banner = `http://localhost:4000/banner/${req.file.filename}`;
     }
-    // save to database
-    await blog.save();
 
-    res.status(201).json({
-      msg: "single Blog Updatea   succesfully",
-      data: blog,
+    await selectedBlog.save();
+
+    res.status(200).json({
+      msg: "Single blog updated successfully",
+      data: selectedBlog,
     });
   } catch (error) {
-    console.log("error from updateBlog controller", error);
+    console.log("Error from updateBlog controller:", error);
+    res.status(500).json({
+      msg: "Error from updateBlog controller",
+      error,
+    });
+  }
+};
+
+// delete blog
+exports.deleteBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const Item = await Blog.findOne({ _id: id });
+    if (!Item) {
+      return res.json({
+        msg: "blog not found",
+      });
+    }
+    const part = Item.banner.split("/");
+    const bannerLocation = part[part.length - 1];
+    const targetPath = path.join("public", "temp", bannerLocation);
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+
+    const deleItem = await Blog.findByIdAndDelete(id);
+
+    return res.status(201).json({
+      msg: "single Blog delete succesfully",
+      data: deleItem,
+    });
+  } catch (error) {
+    console.log("error from  updateBlog controller", error);
     res.status(501).json({
-      msg: "error from updateBlog controller",
+      msg: "error from  updateBlog controller",
       error: error,
     });
   }
