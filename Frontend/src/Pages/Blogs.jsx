@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Blogs = () => {
   const [blog, setBlogs] = useState([]);
@@ -9,6 +10,7 @@ const Blogs = () => {
     description: "",
     banner: null,
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getAllBlog = async () => {
@@ -97,6 +99,10 @@ const Blogs = () => {
     }
   };
 
+  const handleViewBtn = (id) => {
+    navigate(`/blogDetails/${id}`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col sm:flex-row bg-gray-100 p-5 gap-5">
       {/* Form Section - 30% */}
@@ -147,7 +153,10 @@ const Blogs = () => {
             className="bg-white rounded-xl shadow-md overflow-hidden relative"
           >
             {/* View Button */}
-            <button className="absolute top-3 right-3 bg-blue-500 text-white text-sm px-3 py-1 rounded-xl hover:bg-blue-600 cursor-pointer">
+            <button
+              onClick={() => handleViewBtn(blog._id)}
+              className="absolute top-3 right-3 bg-blue-500 text-white text-sm px-3 py-1 rounded-xl hover:bg-blue-600 cursor-pointer"
+            >
               View
             </button>
 
